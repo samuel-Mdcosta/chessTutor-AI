@@ -7,6 +7,7 @@ from app.service.gameService import save_pgn_for_user
 from app.models.gameModel import GameCreate
 from app.service.userService import creat_user
 from app.models.userModel import UserCreate 
+from app.service.tutorService import generate_coach_report
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +29,10 @@ async def register_user(user: UserCreate):
 async def add_game(username: str, pgn_text: str = Body(..., media_type="text/plain")):
     game_data = GameCreate(pgn=pgn_text)
     return await save_pgn_for_user(username, game_data)
+
+@app.post("/users/{username}/report")
+async def get_coach_report(username: str):
+    return await generate_coach_report(username)
 
 @app.post("/analyze")
 async def analyze_pgn(
