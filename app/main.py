@@ -24,9 +24,10 @@ def root():
 async def register_user(user: UserCreate): 
     return await creat_user(user)
 
-@app.post("/games")
-async def add_game(game_data: GameCreate):
-    return await save_pgn_for_user(game_data)
+@app.post("/users/{username}/games")
+async def add_game(username: str, pgn_text: str = Body(..., media_type="text/plain")):
+    game_data = GameCreate(pgn=pgn_text)
+    return await save_pgn_for_user(username, game_data)
 
 @app.post("/analyze")
 async def analyze_pgn(

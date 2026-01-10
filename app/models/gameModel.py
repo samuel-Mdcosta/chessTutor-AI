@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Optional
 
 class GameCreate(BaseModel):
-    user_id: str #id do usario
     pgn: str
 
 class GameInDB(GameCreate):
