@@ -13,7 +13,7 @@ else:
 
 async def get_gemini_analysis(prompt_text: str):
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         response = model.generate_content(prompt_text)
         
