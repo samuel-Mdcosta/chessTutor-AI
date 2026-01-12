@@ -8,6 +8,7 @@ from app.models.gameModel import GameCreate
 from app.service.userService import creat_user
 from app.models.userModel import UserCreate 
 from app.service.tutorService import generate_coach_report
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +17,19 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
 
 app = FastAPI(title="Chess Tutor", lifespan=lifespan)
+
+origins = [
+    "http://localhost:5173",    
+    "http://127.0.0.1:5173",    
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],       
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
