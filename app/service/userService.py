@@ -1,4 +1,4 @@
-from http.client import HTTPException
+from fastapi import HTTPException
 from app.database.database import get_database
 from app.models.userModel import UserCreate
 

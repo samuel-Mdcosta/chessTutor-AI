@@ -11,6 +11,7 @@ from app.service.tutorService import generate_coach_report
 from fastapi.middleware.cors import CORSMiddleware
 from app.service.single_analysis import generate_single_game_review
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_to_mongo()
