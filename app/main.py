@@ -9,6 +9,7 @@ from app.service.userService import creat_user
 from app.models.userModel import UserCreate 
 from app.service.tutorService import generate_coach_report
 from fastapi.middleware.cors import CORSMiddleware
+from app.service.single_analysis import generate_single_game_review
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,6 +55,7 @@ async def analyze_pgn(
 ):
     try:
         result = await process_full_game(pgn)
-        return result
+        ai_report = await generate_single_game_review(result, user_color="White")
+        return ai_report
     except Exception as e:
         return {"error": str(e)}
