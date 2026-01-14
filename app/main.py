@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from app.models.pgn_request import PgnRequest
 from app.service.game_analysis import process_full_game
 from app.database.database import connect_to_mongo, close_mongo_connection
-from app.service.gameService import save_pgn_for_user
+from app.service.gameService import get_games_by_username, save_pgn_for_user
 from app.models.gameModel import GameCreate
 from app.service.userService import creat_user
 from app.models.userModel import UserCreate 
@@ -35,6 +35,12 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"status": "ok"}
+
+@app.get("/users/{username}/games")
+async def read_user_games(username: str):
+
+    games = await get_games_by_username(username)
+    return games
 
 @app.post("/register")
 async def register_user(user: UserCreate): 

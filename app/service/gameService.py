@@ -49,3 +49,39 @@ async def save_pgn_for_user(username: str, game_data: GameCreate):
         "black": new_game["black_player"],
         "result": new_game["result"]
     }
+
+async def get_games_by_username(username: str):
+    db = await get_database()
+
+    user = await db["users"].find_one({"username": username})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail=f"Usuário '{username}' não encontrado.")
+
+    user_id = str(user["_id"])
+
+    cursor = db["games"].find({"user_id": user_id}).sort("_id", -1)
+    games = await cursor.to_list(length=100) # Limite de 100 jogos por enquanto
+
+    formatted_games = []
+
+    for game in games:
+        white_player = game.get("white_player", "Unknown")
+        black_player = game.get("black_player", "Unknown")
+
+        if username.lower() in white_player.lower():
+            opponent = black_player
+            played_as = "White"
+        elif username.lower() in black_player.lower():
+            opponent = white_player
+            played_as = "Black"
+        else:
+            opponent = f"{white_player} vs {black_player}"
+            played_as = "Analysis"
+
+        formatted_games.append({
+            "game_id": str(game["_id"]), # Importante: Converter ObjectId para string
+            "opponent": opponent,        # O que você pediu
+        })
+
+    return formatted_games
