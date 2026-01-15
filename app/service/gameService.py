@@ -15,7 +15,6 @@ async def save_pgn_for_user(username: str, game_data: GameCreate):
     pgn_io = io.StringIO(game_data.pgn)
     
     try:
-        # A biblioteca lê o PGN e separa headers dos lances
         parsed_game = chess.pgn.read_game(pgn_io)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"PGN inválido ou corrompido: {str(e)}")
@@ -61,7 +60,7 @@ async def get_games_by_username(username: str):
     user_id = str(user["_id"])
 
     cursor = db["games"].find({"user_id": user_id}).sort("_id", -1)
-    games = await cursor.to_list(length=100) # Limite de 100 jogos por enquanto
+    games = await cursor.to_list(length=100) 
 
     formatted_games = []
 
@@ -80,8 +79,8 @@ async def get_games_by_username(username: str):
             played_as = "Analysis"
 
         formatted_games.append({
-            "game_id": str(game["_id"]), # Importante: Converter ObjectId para string
-            "opponent": opponent,        # O que você pediu
+            "game_id": str(game["_id"]), 
+            "opponent": opponent,        
         })
 
     return formatted_games
