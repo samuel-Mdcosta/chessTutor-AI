@@ -5,8 +5,8 @@ from app.service.game_analysis import process_full_game
 from app.database.database import connect_to_mongo, close_mongo_connection
 from app.service.gameService import get_games_by_username, save_pgn_for_user
 from app.models.gameModel import GameCreate
-from app.service.userService import creat_user
-from app.models.userModel import UserCreate 
+from app.service.userService import creat_user, authenticate_user
+from app.models.userModel import UserCreate, userLogin
 from app.service.tutorService import generate_coach_report
 from fastapi.middleware.cors import CORSMiddleware
 from app.service.single_analysis import generate_single_game_review
@@ -66,3 +66,7 @@ async def analyze_pgn(
         return ai_report
     except Exception as e:
         return {"error": str(e)}
+    
+@app.post("/login")
+async def login(user: userLogin):
+    return await authenticate_user(user)

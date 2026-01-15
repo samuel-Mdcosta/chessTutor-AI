@@ -10,3 +10,7 @@ class UserResponse(BaseModel):
     id: str
     username: str
     email: EmailStr
+
+class userLogin(BaseModel):
+    email: EmailStr
+    password: str
