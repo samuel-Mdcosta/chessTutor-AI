@@ -1,27 +1,32 @@
 import chess.engine
 import chess
 import os
+import platform
 
-ENGINE_PATH = "engineStockfish/stockfish-windows-x86-64-avx2.exe"
+system_platform = platform.system()
 
-engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
+if system_platform == "Windows":
+    ENGINE_PATH = os.path.join("engineStockfish", "stockfish-windows-x86-64-avx2.exe")
+else:
+    ENGINE_PATH = os.path.join("engineStockfish", "stockfish_linux")
 
-def analyze_game(board, depth=15):
-    return engine.analyse(board, chess.engine.Limit(depth=depth))
+    if os.path.exists(ENGINE_PATH):
+        os.chmod(ENGINE_PATH, 0o755)
 
 def get_engine():
-    return engine
+    return chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
+
+def analyze_game(board, depth=15):
+    engine = get_engine()
+
 
 def analyze_position(engine, board: chess.Board, time_limit: float = 0.1):
     info = engine.analyse(board, chess.engine.Limit(time=time_limit))
 
-    #score#
-    score = info["score"].white() #padrao da perspectiva das brancas#
+    score = info["score"].white()
 
-    #mate#
     mate = score.mate()
 
-    #quando for mate retorna 0#
     cp = score.score()
 
     best_move = info.get("pv")[0] if info.get("pv") else None
