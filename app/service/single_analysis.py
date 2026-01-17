@@ -1,8 +1,6 @@
 import google.generativeai as genai
 import os
 
-# Certifique-se de configurar sua chave em algum lugar do projeto
-# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 async def generate_single_game_review(game_data: dict, user_color: str):
     """
@@ -13,26 +11,20 @@ async def generate_single_game_review(game_data: dict, user_color: str):
     :return: String (Markdown) com a análise da IA.
     """
     
-    # 1. Extraindo dados básicos do JSON do Stockfish
     headers = game_data.get("headers", {})
     moves = game_data.get("analysis", [])
     
-    # Filtra apenas os lances do usuário
     user_moves = [m for m in moves if m.get("color", "").lower() == user_color.lower()]
     
-    # Coleta estatísticas rápidas
     blunders = [m for m in user_moves if m["classification"] == "Blunder"]
     mistakes = [m for m in user_moves if m["classification"] == "Mistake"]
     inaccuracies = [m for m in user_moves if m["classification"] == "Inaccuracy"]
     brilliants = [m for m in user_moves if m["classification"] in ["Best Move", "Excellent"]]
 
-    # Encontra o PIOR lance da partida (maior perda de centipawns)
     worst_move = None
     if user_moves:
         worst_move = max(user_moves, key=lambda x: x.get("cp_loss", 0))
 
-    # 2. Montando o Prompt Simplificado
-    # Em vez de mandar o PGN cru, mandamos o "Boletim" que o Python gerou.
     
     game_summary = f"""
     CONTEXTO DO JOGO:
@@ -77,9 +69,7 @@ async def generate_single_game_review(game_data: dict, user_color: str):
     Tom: Educativo, curto e motivador. Português do Brasil.
     """
 
-    # 3. Chamada para a IA
     try:
-        # Usando o flash para ser rápido na aba de análise, ou pro para melhor qualidade
         model = genai.GenerativeModel('gemini-flash-latest') 
         response = await model.generate_content_async(prompt)
         return response.text

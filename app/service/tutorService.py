@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from app.database.database import get_database
+from app.database.mongo import get_database
 from app.ia.prompts import build_tutor_prompt
 from app.ia.client import get_gemini_analysis
 

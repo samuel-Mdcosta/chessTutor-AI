@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from app.database.database import get_database
+from app.database.mongo import get_database
 from app.models.userModel import UserCreate
 from app.models.userModel import userLogin
 

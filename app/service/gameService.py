@@ -1,7 +1,7 @@
 import chess.pgn
 import io
 from fastapi import HTTPException
-from app.database.database import get_database
+from app.database.mongo import get_database
 from app.models.gameModel import GameCreate
 
 async def save_pgn_for_user(username: str, game_data: GameCreate):
