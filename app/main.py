@@ -21,8 +21,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Chess Tutor", lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",    
+    "http://localhost:5173",      
     "http://127.0.0.1:5173",    
+    "https://chesstutor-ai.onrender.com", 
+    "*"
 ]
 
 app.add_middleware(
@@ -39,7 +41,6 @@ def root():
 
 @app.get("/users/{username}/games")
 async def read_user_games(username: str):
-
     games = await get_games_by_username(username)
     return games
 
