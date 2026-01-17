@@ -22,7 +22,7 @@ app = FastAPI(title="Chess Tutor", lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",      
-    "http://127.0.0.1:5173",    
+    "https://chess-tutor-ai-nine.vercel.app",    
     "https://chesstutor-ai.onrender.com", 
     "*"
 ]
