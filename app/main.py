@@ -65,15 +65,15 @@ async def get_coach_report(username: str):
 async def analyze_pgn(request: AnalyzeRequest):
     try:
         result = await process_full_game(request.pgn)
-        
         ai_report = await generate_single_game_review(
             result, 
-            user_color_override=request.player_color 
+            player_name=request.username 
         )
         return ai_report
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": str(e)}    
     
+
 @app.post("/login")
 async def login(user: userLogin):
     return await authenticate_user(user)
