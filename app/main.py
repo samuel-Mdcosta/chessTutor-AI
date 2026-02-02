@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Body
+from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from app.models.pgn_request import PgnRequest
 from app.service.game_analysis import process_full_game
@@ -10,6 +11,10 @@ from app.models.userModel import UserCreate, userLogin
 from app.service.tutorService import generate_coach_report
 from fastapi.middleware.cors import CORSMiddleware
 from app.service.single_analysis import generate_single_game_review
+
+class AnalyzeRequest(BaseModel):
+    pgn: str
+    username: str | None = None
 
 
 @asynccontextmanager
@@ -57,12 +62,14 @@ async def get_coach_report(username: str):
     return await generate_coach_report(username)
 
 @app.post("/analyze")
-async def analyze_pgn(
-    pgn: str = Body(..., media_type="text/plain")
-):
+async def analyze_pgn(request: AnalyzeRequest):
     try:
-        result = await process_full_game(pgn)
-        ai_report = await generate_single_game_review(result, user_color="White")
+        result = await process_full_game(request.pgn)
+        
+        ai_report = await generate_single_game_review(
+            result, 
+            user_color_override=request.player_color 
+        )
         return ai_report
     except Exception as e:
         return {"error": str(e)}
