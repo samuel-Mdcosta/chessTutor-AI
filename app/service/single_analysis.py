@@ -47,7 +47,7 @@ async def generate_single_game_review(game_data: dict, player_name: str = None):
     - Resultado: {headers.get('Result', '?')}
     
     ESTATÍSTICAS ({user_color}):
-    - Lances Brilhantes: {len(brilliants)}
+    - Melhores Lances/Excelentes: {len(brilliants)}
     - Erros Graves (Blunders): {len(blunders)}
     - Erros (Mistakes): {len(mistakes)}
     
@@ -62,9 +62,11 @@ async def generate_single_game_review(game_data: dict, player_name: str = None):
     DADOS:
     {game_summary}
     
-    TAREFA:
-    Escreva um feedback curto, útil e motivador em Markdown (PT-BR).
-    Não critique o oponente, foque em como o aluno pode melhorar.
+    TAREFA E REGRAS:
+    1. Escreva um feedback curto, útil e motivador em Markdown (PT-BR).
+    2. Não critique o oponente, foque em como o aluno pode melhorar.
+    3. IMPORTANTE: Você NÃO tem acesso ao tabuleiro (FEN). Portanto, NÃO invente análises táticas específicas, NÃO adivinhe quais peças estavam envolvidas no pior lance e NÃO suponha a fase do jogo (abertura, meio-jogo ou final).
+    4. Limite seus conselhos à consistência geral baseada no número de erros e acertos.
     """
 
     try:
