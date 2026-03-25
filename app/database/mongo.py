@@ -13,6 +13,8 @@ class Database:
 db = Database()
 
 async def get_database():
+    db["games"].create_index([("user_id", 1), ("created_at", -1)])
+    db["users"].create_index([("username", 1)])
     return db.client[DATABASE_NAME]
 
 async def connect_to_mongo():

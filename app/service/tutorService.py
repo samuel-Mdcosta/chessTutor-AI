@@ -1,6 +1,5 @@
-import hashlib
-from functools import lru_cache
 from fastapi import HTTPException
+import logging
 from app.database.mongo import get_database
 from app.ia.prompts import build_tutor_prompt
 from app.ia.client import get_gemini_analysis
@@ -30,7 +29,8 @@ async def generate_coach_report(username: str):
         
         pgns_concatenated += f"--- PARTIDA {i} ({white} vs {black} | Resultado: {result}) ---\n{content}\n\n"
 
-    print(f"🤖 Gerando prompt para {len(games)} partidas...")
+    logger = logging.getLogger("tutorService")
+    logger.info(f"Gerando relatório para {username} com {len(games)} partidas")
     final_prompt = build_tutor_prompt(
         username=username, 
         pgns_text=pgns_concatenated, 
