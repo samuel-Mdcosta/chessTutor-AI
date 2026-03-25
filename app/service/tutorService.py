@@ -12,7 +12,7 @@ async def generate_coach_report(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-    cursor = db["games"].find({"user_id": str(user["_id"])}).sort("created_at", -1)
+    cursor = db["games"].find({"user_id": str(user["_id"])}).sort("created_at", -1).limit(10)
     games = await cursor.to_list(length=None)
 
     if not games:
