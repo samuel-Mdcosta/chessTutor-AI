@@ -1,3 +1,5 @@
+import hashlib
+from functools import lru_cache
 from fastapi import HTTPException
 from app.database.mongo import get_database
 from app.ia.prompts import build_tutor_prompt
@@ -42,3 +44,16 @@ async def generate_coach_report(username: str):
         "games_analyzed": len(games),
         "tutor_report": ai_response
     }
+
+async def get_chache(pgn_hash: str):
+    db = await get_database()
+    chached = await db["tutor_cache"].find_one({"pgn_hash": pgn_hash})
+    if chached:
+        return chached['result']
+    return None
+
+async def save_cache(pgn_hash: str, result: str):
+    db = await get_database()
+    await db["tutor_cache"].insert_one(
+        {"pgn_hash": pgn_hash, "result": result}
+    )
