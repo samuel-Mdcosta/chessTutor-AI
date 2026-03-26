@@ -1,3 +1,4 @@
+import hashlib
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
@@ -8,9 +9,10 @@ from app.service.gameService import get_games_by_username, save_pgn_for_user
 from app.models.gameModel import GameCreate
 from app.service.userService import creat_user, authenticate_user
 from app.models.userModel import UserCreate, userLogin
-from app.service.tutorService import generate_coach_report
+from app.service.tutorService import generate_coach_report, get_chache, save_cache
 from fastapi.middleware.cors import CORSMiddleware
 from app.service.single_analysis import generate_single_game_review
+from app.core.stockfish import init_engine_pool, shutdown_engine_pool
 
 class AnalyzeRequest(BaseModel):
     pgn: str
@@ -20,14 +22,16 @@ class AnalyzeRequest(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_to_mongo()
+    init_engine_pool()
     yield
+    shutdown_engine_pool()
     await close_mongo_connection()
 
 app = FastAPI(title="Chess Tutor", lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",      
-    "https://chess-tutor-ai-nine.vercel.app",    
+    "http://localhost:5173",
+    "https://chess-tutor-ai-nine.vercel.app",
     "https://chesstutor-ai.onrender.com"
 ]
 
@@ -35,7 +39,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],       
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -49,7 +53,7 @@ async def read_user_games(username: str):
     return games
 
 @app.post("/register")
-async def register_user(user: UserCreate): 
+async def register_user(user: UserCreate):
     return await creat_user(user)
 
 @app.post("/users/{username}/games")
@@ -64,15 +68,29 @@ async def get_coach_report(username: str):
 @app.post("/analyze")
 async def analyze_pgn(request: AnalyzeRequest):
     try:
+        pgn_hash = hashlib.sha256(request.pgn.encode()).hexdigest()
+
+        cached = await get_chache(pgn_hash)
+        if cached:
+            return cached
+
         result = await process_full_game(request.pgn)
         ai_report = await generate_single_game_review(
-            result, 
-            player_name=request.username 
+            result,
+            player_name=request.username
         )
-        return ai_report
+
+        response = {
+            "game_data": result,
+            "ai_report": ai_report
+        }
+
+        await save_cache(pgn_hash, response)
+
+        return response
     except Exception as e:
-        return {"error": str(e)}    
-    
+        return {"error": str(e)}
+
 
 @app.post("/login")
 async def login(user: userLogin):

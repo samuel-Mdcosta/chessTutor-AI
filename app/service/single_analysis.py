@@ -1,5 +1,4 @@
-import google.generativeai as genai
-import os
+from app.ia.client import get_gemini_analysis
 
 async def generate_single_game_review(game_data: dict, player_name: str = None):
     """
@@ -70,8 +69,6 @@ async def generate_single_game_review(game_data: dict, player_name: str = None):
     """
 
     try:
-        model = genai.GenerativeModel('gemini-flash-latest') 
-        response = await model.generate_content_async(prompt)
-        return response.text
+        return await get_gemini_analysis(prompt)
     except Exception as e:
         return f"Erro na IA: {str(e)}"

@@ -1,7 +1,8 @@
 from app.service.pgn_parser import parse_pgn
 import chess.pgn
 import io
-from app.core.stockfish import analyze_position, get_engine
+import asyncio
+from app.core.stockfish import analyze_position, acquire_engine, release_engine
 
 def analyze_game(pgn_text: str):
     positions = parse_pgn(pgn_text)
@@ -31,19 +32,19 @@ def get_move_category(diff_cp):
     else:
         return "Blunder"        # ?? Erro Grave (Capivarada)
 
-async def process_full_game(pgn_text: str):
+def _run_stockfish_analysis(pgn_text: str):
+    """Executa análise Stockfish de forma síncrona (será chamada em thread separada)."""
     pgn_io = io.StringIO(pgn_text)
     game = chess.pgn.read_game(pgn_io)
 
     if not game:
         return {"error": "Invalid PGN"}
-    
+
     board = game.board()
     analysis_results = []
 
-    engine = get_engine()
+    engine = acquire_engine()
 
-    # Analisa cada posicao no jogo #
     try:
         initial_event = analyze_position(engine, board, time_limit=0.1)
         prev_score_val = normalize_score(initial_event["evaluation"])
@@ -51,13 +52,11 @@ async def process_full_game(pgn_text: str):
             "move_number": 0,
             "move_played": "Start",
             **initial_event,
-            "classification": "Book" #posicao inicial#
+            "classification": "Book"
         })
         move_count = 1
         for move in game.mainline_moves():
-            #verifica quem joga#
             white_turn = board.turn
-
             board.push(move)
 
             eval_data = analyze_position(engine, board, time_limit=0.1)
@@ -75,16 +74,20 @@ async def process_full_game(pgn_text: str):
                 "move_played": str(move),
                 "classification": classification,
                 "cp_loss": cp_loss,
-                **eval_data # Os dados do Stockfish (melhor lance, avaliação)
+                **eval_data
             })
 
             prev_score_val = current_score_val
             move_count += 1
-            
+
     finally:
-        engine.quit()
+        release_engine(engine)
 
     return {
-            "headers": dict(game.headers),
-            "analysis": analysis_results
-        }
+        "headers": dict(game.headers),
+        "analysis": analysis_results
+    }
+
+async def process_full_game(pgn_text: str):
+    """Roda análise Stockfish em thread separada para não bloquear o event loop."""
+    return await asyncio.to_thread(_run_stockfish_analysis, pgn_text)
