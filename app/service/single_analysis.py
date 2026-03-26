@@ -1,22 +1,28 @@
 from app.ia.client import get_gemini_analysis
 
-async def generate_single_game_review(game_data: dict, player_name: str = None):
+async def generate_single_game_review(game_data: dict, player_name: str = None, player_color: str = None):
     """
-    Gera análise tentando detectar automaticamente a cor do usuário.
+    Gera análise para o usuário. Se player_color for fornecido ('white'/'black'),
+    usa esse valor diretamente. Caso contrário, tenta detectar pelo nome.
     """
-    
+
     headers = game_data.get("headers", {})
-    
-    user_color = "White" 
-    
-    white_player = headers.get('White', '').lower().strip()
-    black_player = headers.get('Black', '').lower().strip()
-    
-    target_name = player_name.lower().strip() if player_name else ""
-    if target_name and target_name in black_player:
-        user_color = "Black"
-    elif target_name and target_name in white_player:
+
+    user_color = ""
+
+    if player_color == "white":
         user_color = "White"
+    elif player_color == "black":
+        user_color = "Black"
+    else:
+        white_player = headers.get('White', '').lower().strip()
+        black_player = headers.get('Black', '').lower().strip()
+
+        target_name = player_name.lower().strip() if player_name else ""
+        if target_name and target_name in black_player:
+            user_color = "Black"
+        elif target_name and target_name in white_player:
+            user_color = "White"
     
     if user_color == "White":
         display_player = headers.get('White', 'Você')

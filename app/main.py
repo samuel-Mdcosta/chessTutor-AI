@@ -17,6 +17,7 @@ from app.core.stockfish import init_engine_pool, shutdown_engine_pool
 class AnalyzeRequest(BaseModel):
     pgn: str
     username: str | None = None
+    color: str | None = None
 
 
 @asynccontextmanager
@@ -68,7 +69,8 @@ async def get_coach_report(username: str):
 @app.post("/analyze")
 async def analyze_pgn(request: AnalyzeRequest):
     try:
-        pgn_hash = hashlib.sha256(request.pgn.encode()).hexdigest()
+        cache_key = f"{request.pgn}:{request.color or ''}"
+        pgn_hash = hashlib.sha256(cache_key.encode()).hexdigest()
 
         cached = await get_chache(pgn_hash)
         if cached:
@@ -77,7 +79,8 @@ async def analyze_pgn(request: AnalyzeRequest):
         result = await process_full_game(request.pgn)
         ai_report = await generate_single_game_review(
             result,
-            player_name=request.username
+            player_name=request.username,
+            player_color=request.color,
         )
 
         response = {
