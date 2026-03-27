@@ -48,15 +48,19 @@ def _run_stockfish_analysis(pgn_text: str):
     try:
         initial_event = analyze_position(engine, board, time_limit=0.1)
         prev_score_val = normalize_score(initial_event["evaluation"])
+
+        prev_best_move = initial_event.get("best_move")
+
         analysis_results.append({
             "move_number": 0,
             "move_played": "Start",
-            **initial_event,
+            "evaluation": initial_event["evaluation"],
             "classification": "Book"
         })
         move_count = 1
         for move in game.mainline_moves():
             white_turn = board.turn
+            best_move_for_this_turn = prev_best_move
             board.push(move)
 
             eval_data = analyze_position(engine, board, time_limit=0.1)
@@ -72,12 +76,14 @@ def _run_stockfish_analysis(pgn_text: str):
                 "move_number": move_count,
                 "color": "White" if white_turn else "Black",
                 "move_played": str(move),
+                "best_move": best_move_for_this_turn,
                 "classification": classification,
                 "cp_loss": cp_loss,
                 **eval_data
             })
 
             prev_score_val = current_score_val
+            prev_best_move = eval_data.get("best_move")
             move_count += 1
 
     finally:
