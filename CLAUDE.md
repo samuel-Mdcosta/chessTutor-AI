@@ -29,7 +29,7 @@ app/
     ├── gameService.py
     ├── game_analysis.py  # Full game analysis pipeline
     ├── pgn_parser.py
-    ├── single_analysis.py
+    ├── single_analysis.py  # Builds Gemini prompt from Stockfish data (blunders, cp_loss, best moves)
     ├── tutorService.py   # Coaching/tutor logic with caching
     └── userService.py    # Auth and user management
 ```
@@ -46,3 +46,10 @@ app/
 - AI/LLM interactions are isolated in `app/ia/`
 - Database access goes through `app/database/mongo.py`
 - Entry point is `app/main.py`; run via `uvicorn app.main:app`
+
+## Analysis pipeline (`/analyze` route)
+1. `process_full_game(pgn)` — runs Stockfish on every ply, returns `{headers, analysis: [...]}`
+2. Each move in `analysis` has: `move_played` (UCI), `best_move` (UCI), `cp_loss`, `classification`, `evaluation`
+3. `generate_single_game_review(result, ...)` — reads Stockfish output, extracts blunders/mistakes with their details, and builds a grounded prompt for Gemini
+- Gemini receives actual engine data (moves, cp_loss, best alternatives) — never generic stats only
+- Move notation sent to Gemini is UCI; prompt instructs conversion to algebraic
