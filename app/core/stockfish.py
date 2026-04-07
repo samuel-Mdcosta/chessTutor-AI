@@ -79,7 +79,7 @@ def release_engine(engine):
 def get_engine():
     return _create_engine()
 
-def analyze_position(engine, board: chess.Board, time_limit: float = 0.1):
+def analyze_position(engine, board: chess.Board, time_limit: float = 0.05):
     info = engine.analyse(board, chess.engine.Limit(time=time_limit))
     score = info["score"].white()
 
