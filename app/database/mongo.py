@@ -17,6 +17,11 @@ async def get_database():
 
 async def connect_to_mongo():
     db.client = AsyncIOMotorClient(MONGO_URL)
+    database = db.client[DATABASE_NAME]
+    await database["tutor_cache"].create_index(
+        "created_at",
+        expireAfterSeconds=86400
+    )
     print("Connected to MongoDB")
 
 async def close_mongo_connection():

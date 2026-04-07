@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 import logging
+from datetime import datetime, timezone
 from app.database.mongo import get_database
 from app.ia.prompts import build_tutor_prompt
 from app.ia.client import get_gemini_analysis
@@ -54,6 +55,8 @@ async def get_chache(pgn_hash: str):
 
 async def save_cache(pgn_hash: str, result: str):
     db = await get_database()
-    await db["tutor_cache"].insert_one(
-        {"pgn_hash": pgn_hash, "result": result}
+    await db["tutor_cache"].update_one(
+        {"pgn_hash": pgn_hash},
+        {"$set": {"result": result, "created_at": datetime.now(timezone.utc)}},
+        upsert=True
     )
