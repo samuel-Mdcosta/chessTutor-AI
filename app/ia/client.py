@@ -14,9 +14,18 @@ else:
 
 _model = genai.GenerativeModel('gemini-flash-latest')
 
+_generation_config = genai.types.GenerationConfig(
+    temperature=0.0,
+    top_p=0.95,
+    max_output_tokens=8192,
+)
+
 async def get_gemini_analysis(prompt_text: str):
     try:
-        response = await _model.generate_content_async(prompt_text)
+        response = await _model.generate_content_async(
+            prompt_text,
+            generation_config=_generation_config,
+        )
         return response.text
     except Exception as e:
         logger.error(f"Erro na comunicação com a IA: {e}")

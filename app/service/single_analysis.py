@@ -108,17 +108,18 @@ async def generate_single_game_review(game_data: dict, player_name: str = None, 
     Atue como um Treinador de Xadrez Pessoal.
     Analise a partida focando EXCLUSIVAMENTE no jogador de {user_color} (que é o usuário).
 
-    DADOS (gerados pelo motor Stockfish — avaliações são objetivas):
+    DADOS (gerados pelo motor Stockfish — avaliações são objetivas e não devem ser alteradas):
     {game_summary}
 
-    NOTAÇÃO: Os lances estão em UCI (origem+destino). Exemplos: e2e4 = peão e2→e4, g1f3 = cavalo g1→f3, e1g1 = roque curto das brancas. Converta para notação algébrica ao citar os lances.
+    NOTAÇÃO UCI: Os lances estão no formato origem+destino (ex: e2e4, g1f3, e1g1).
+    REGRA CRÍTICA: Cite os lances EXATAMENTE como aparecem nos dados acima, no formato UCI. NÃO tente converter para notação algébrica — você pode errar a peça ou o lance. Use o formato "lance e2e4" ou "o lance g1f3".
 
     TAREFA E REGRAS:
     1. Escreva um feedback curto, útil e motivador em Markdown (PT-BR).
     2. Não critique o oponente, foque em como o aluno pode melhorar.
-    3. CRÍTICO: Use APENAS os dados fornecidos acima. NUNCA invente lances ou avaliações diferentes dos que estão nos dados.
-    4. Para cada blunder/mistake listado, explique brevemente o que provavelmente aconteceu e por que o lance sugerido pelo Stockfish seria superior.
-    5. Baseie comentários táticos SOMENTE nos lances listados. Não analise posições não fornecidas.
+    3. CRÍTICO: Use APENAS os dados fornecidos acima. NUNCA invente lances, números de lance ou avaliações que não estejam nos dados.
+    4. Para cada blunder/mistake listado, explique brevemente o que provavelmente aconteceu taticamente e por que o lance do Stockfish seria superior — sem inventar variantes não fornecidas.
+    5. Se não há blunders ou mistakes, destaque os pontos fortes observados nos dados.
     """
 
     try:
