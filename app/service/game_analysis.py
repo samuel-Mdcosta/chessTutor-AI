@@ -18,19 +18,25 @@ def normalize_score(evaluation):
         return sign * (10000 - abs(evaluation["value"]) * 100)
     return evaluation["value"]
 
-def get_move_category(diff_cp):
+def get_move_category(diff_cp, player_was_winning: bool = False, is_opening: bool = False):
+    if is_opening and diff_cp <= 0:
+        return "Book"           # Teoria de abertura
     if diff_cp <= 0:
-        return "Best Move"      # Jogou tão bem quanto (ou melhor que) a engine esperava
+        return "Best Move"      # Melhor lance possível
     elif diff_cp <= 25:
-        return "Excellent"      # Perda insignificante
-    elif diff_cp <= 75:
-        return "Good"           # Perda pequena
-    elif diff_cp <= 150:
+        return "Excellent"      # Excelente
+    elif diff_cp <= 50:
+        return "Great"          # Ótimo
+    elif diff_cp <= 100:
+        return "Good"           # Bom
+    elif diff_cp <= 200:
         return "Inaccuracy"     # ?! Imprecisão
     elif diff_cp <= 400:
+        if player_was_winning:
+            return "Miss"       # Chance Perdida — posição vencedora, mas perdeu a continuação
         return "Mistake"        # ? Erro
     else:
-        return "Blunder"        # ?? Erro Grave (Capivarada)
+        return "Blunder"        # ?? Capivarada
 
 def _run_stockfish_analysis(pgn_text: str):
     """Executa análise Stockfish de forma síncrona (será chamada em thread separada)."""
@@ -68,10 +74,13 @@ def _run_stockfish_analysis(pgn_text: str):
 
             if white_turn:
                 cp_loss = prev_score_val - current_score_val
+                player_was_winning = prev_score_val > 300
             else:
                 cp_loss = current_score_val - prev_score_val
+                player_was_winning = prev_score_val < -300
 
-            classification = get_move_category(cp_loss)
+            is_opening = move_count <= 14  # ~7 lances por lado = fase de abertura
+            classification = get_move_category(cp_loss, player_was_winning=player_was_winning, is_opening=is_opening)
             analysis_results.append({
                 "move_number": move_count,
                 "color": "White" if white_turn else "Black",
